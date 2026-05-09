@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   boostText: { fontSize: 13, flex: 1 },
   bookmarkBtn: { padding: 4 },
   postBody: { flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 12 },
-  avatar: { width: 44, height: 44, marginRight: 12, marginTop: 2 },
+  avatar: { marginRight: 12, marginTop: 2 },
   postMain: { flex: 1 },
   authorRow: {
     flexDirection: 'row',

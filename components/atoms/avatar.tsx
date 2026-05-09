@@ -12,5 +12,5 @@ export function Avatar({ uri, style }: {uri: string, style?: object}) {
 }
 
 const styles = StyleSheet.create({
-    avatar: { width: 32, height: 32, borderRadius: 12 },
+    avatar: { width: 44, height: 44, borderRadius: 12 },
 })

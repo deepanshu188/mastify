@@ -66,12 +66,12 @@ export default function HomeScreen() {
             borderBottomColor: theme.border,
           },
         ]}>
-        <LogoTextIcon />
+        <LogoTextIcon color={theme.logoColor} />
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.headerBtn} activeOpacity={0.7}>
             <FilterIcon />
           </TouchableOpacity>
-          {auth.avatar ? <Avatar uri={auth.avatar} /> : null}
+          {auth.avatar ? <Avatar uri={auth.avatar} style={styles.headerAvatar} /> : null}
         </View>
       </View>
 
@@ -96,7 +96,7 @@ export default function HomeScreen() {
       )}
 
       <Pressable
-        style={[styles.fab, { backgroundColor: theme.tint, bottom: 66 }]}
+        style={[styles.fab, { backgroundColor: theme.tintColorDefault, bottom: 66 }]}
         android_ripple={{ color: 'rgba(255,255,255,0.3)', radius: 28 }}>
         <PencilIcon />
       </Pressable>
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontWeight: '700' },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerBtn: { padding: 4 },
-  headerAvatar: { width: 32, height: 32, borderRadius: 16 },
+  headerAvatar: { width: 32, height: 32 },
   card: { borderBottomWidth: StyleSheet.hairlineWidth, paddingTop: 12 },
   avatar: { width: 44, height: 44, borderRadius: 22, marginRight: 12, marginTop: 2 },
   fab: {
