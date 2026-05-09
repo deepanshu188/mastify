@@ -115,9 +115,9 @@ export function PostCard({ status }: { status: mastodon.v1.Status }) {
             {!booster && (
               <TouchableOpacity activeOpacity={0.6}>
                 <Ionicons
-                  name={post.bookmarked ? 'bookmark' : 'bookmark-outline'}
+                  name="share-outline"
                   size={18}
-                  color={post.bookmarked ? theme.tint : theme.secondary}
+                  color={theme.secondary}
                 />
               </TouchableOpacity>
             )}
