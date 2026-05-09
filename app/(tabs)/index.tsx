@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { LegendList } from "@legendapp/list";
 import { createRestAPIClient, mastodon } from 'masto';
 import { useCallback, useEffect, useState } from 'react';
@@ -12,6 +11,9 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import FilterIcon from '@/assets/icons/filter.svg';
+import PencilIcon from '@/assets/icons/pencil.svg';
+import LogoTextIcon from '@/assets/logo.svg';
 import { Avatar } from '@/components/atoms/avatar';
 import { PostCard } from '@/components/organisms/post-card';
 import { useAuth } from '@/context/auth';
@@ -64,10 +66,10 @@ export default function HomeScreen() {
             borderBottomColor: theme.border,
           },
         ]}>
-        <Text style={[styles.headerTitle, { color: theme.text }]}>Mastify</Text>
+        <LogoTextIcon />
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.headerBtn} activeOpacity={0.7}>
-            <Ionicons name="options-outline" size={22} color={theme.text} />
+            <FilterIcon />
           </TouchableOpacity>
           {auth.avatar ? <Avatar uri={auth.avatar} /> : null}
         </View>
@@ -94,9 +96,9 @@ export default function HomeScreen() {
       )}
 
       <Pressable
-        style={[styles.fab, { backgroundColor: theme.tint, bottom: 16 }]}
+        style={[styles.fab, { backgroundColor: theme.tint, bottom: 66 }]}
         android_ripple={{ color: 'rgba(255,255,255,0.3)', radius: 28 }}>
-        <Ionicons name="create-outline" size={24} color="#fff" />
+        <PencilIcon />
       </Pressable>
     </View>
   );

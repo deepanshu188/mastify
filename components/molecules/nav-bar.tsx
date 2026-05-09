@@ -9,14 +9,14 @@ import { IconSymbol } from '@/components/atoms/icon-symbol';
 
 type TabConfig = {
   name: string;
-  icon: 'home' | 'explore' | 'notifications' | 'mail';
+  icon: 'home' | 'explore' | 'notifications' | 'message';
 };
 
 const TAB_ICONS: TabConfig[] = [
   { name: 'index', icon: 'home' },
   { name: 'explore', icon: 'explore' },
   { name: 'notifications', icon: 'notifications' },
-  { name: 'messages', icon: 'mail' },
+  { name: 'messages', icon: 'message' },
 ];
 
 export function NavBar({ state, navigation }: BottomTabBarProps) {
