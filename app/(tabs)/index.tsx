@@ -90,12 +90,12 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-         <LegendList
-      data={statuses}
-      renderItem={({ item }) => <PostCard status={item} />}
-      keyExtractor={(item) => item.id}
-      recycleItems
-    />
+        <LegendList
+          data={statuses}
+          renderItem={({ item }) => <PostCard status={item} />}
+          keyExtractor={(item) => item.id}
+          recycleItems
+        />
       )}
 
       <Pressable

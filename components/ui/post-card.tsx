@@ -10,6 +10,7 @@ import {
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { StyleSheet } from 'react-native-unistyles';
+import { Avatar } from './avatar';
 
 function PostContent({ text, tint }: { text: string; tint: string; textColor: string }) {
   const colorScheme = useColorScheme();
@@ -109,7 +110,8 @@ export function PostCard({ status }: { status: mastodon.v1.Status }) {
       )}
 
       <View style={styles.postBody}>
-        <Image source={{ uri: post.account.avatarStatic }} style={styles.avatar} />
+        {/* <Image source={{ uri: post.account.avatarStatic }} style={styles.avatar} /> */}
+        <Avatar uri={post.account.avatarStatic} style={styles.avatar} />
 
         <View style={styles.postMain}>
           <View style={styles.authorRow}>
@@ -185,7 +187,7 @@ const styles = StyleSheet.create({
   boostText: { fontSize: 13, flex: 1 },
   bookmarkBtn: { padding: 4 },
   postBody: { flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 12 },
-  avatar: { width: 44, height: 44, borderRadius: 22, marginRight: 12, marginTop: 2 },
+  avatar: { width: 44, height: 44, marginRight: 12, marginTop: 2 },
   postMain: { flex: 1 },
   authorRow: {
     flexDirection: 'row',
