@@ -1,98 +1,143 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LegendList } from "@legendapp/list";
+import { createRestAPIClient, mastodon } from 'masto';
+import { useCallback, useEffect, useState } from 'react';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { Avatar } from '@/components/ui/avatar';
+import { PostCard } from '@/components/ui/post-card';
+import { Colors } from '@/constants/theme';
+import { useAuth } from '@/context/auth';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
+  const border = colorScheme === 'dark' ? '#2a2a2a' : '#e5e5e5';
+  const secondary = colorScheme === 'dark' ? '#9BA1A6' : '#6b7280';
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const { auth } = useAuth();
+  const [statuses, setStatuses] = useState<mastodon.v1.Status[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchTimeline = useCallback(async () => {
+    if (!auth.token || !auth.instance) return;
+    try {
+      const client = createRestAPIClient({
+        url: `https://${auth.instance}`,
+        accessToken: auth.token,
+      });
+      const statuses = await client.v1.timelines.home.list({ limit: 40 });
+      setStatuses(statuses);
+      setError(null);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to load timeline');
+    }
+  }, [auth.token, auth.instance]);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchTimeline().finally(() => setLoading(false));
+  }, [fetchTimeline]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchTimeline();
+    setRefreshing(false);
+  }, [fetchTimeline]);
+
+  return (
+    <View style={[styles.screen, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: insets.top,
+            backgroundColor: colors.background,
+            borderBottomColor: border,
+          },
+        ]}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Mastify</Text>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.headerBtn} activeOpacity={0.7}>
+            <Ionicons name="options-outline" size={22} color={colors.text} />
+          </TouchableOpacity>
+          {auth.avatar ? <Avatar uri={auth.avatar} /> : null}
+        </View>
+      </View>
+
+      {loading ? (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={colors.tint} />
+        </View>
+      ) : error ? (
+        <View style={styles.centered}>
+          <Text style={[styles.errorText, { color: secondary }]}>{error}</Text>
+          <TouchableOpacity onPress={onRefresh} style={styles.retryBtn}>
+            <Text style={{ color: colors.tint }}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+         <LegendList
+      data={statuses}
+      renderItem={({ item }) => <PostCard status={item} />}
+      keyExtractor={(item) => item.id}
+      recycleItems
+    />
+      )}
+
+      <Pressable
+        style={[styles.fab, { backgroundColor: colors.tint, bottom: 16 }]}
+        android_ripple={{ color: 'rgba(255,255,255,0.3)', radius: 28 }}>
+        <Ionicons name="pencil" size={22} color="#fff" />
+      </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  screen: { flex: 1 },
+  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
+  errorText: { fontSize: 14, textAlign: 'center', paddingHorizontal: 32 },
+  retryBtn: { paddingVertical: 8, paddingHorizontal: 20 },
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  headerTitle: { fontSize: 22, fontWeight: '700' },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headerBtn: { padding: 4 },
+  headerAvatar: { width: 32, height: 32, borderRadius: 16 },
+  card: { borderBottomWidth: StyleSheet.hairlineWidth, paddingTop: 12 },
+  avatar: { width: 44, height: 44, borderRadius: 22, marginRight: 12, marginTop: 2 },
+  fab: {
     position: 'absolute',
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6,
   },
 });
