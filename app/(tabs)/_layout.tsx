@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { NavBar } from '@/components/nav-bar';
+import { NavBar } from '@/components/molecules/nav-bar';
 
 export default function TabLayout() {
   return (

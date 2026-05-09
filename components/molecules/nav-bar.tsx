@@ -5,18 +5,18 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { IconSymbol } from '@/components/atoms/icon-symbol';
 
 type TabConfig = {
   name: string;
-  icon: 'house.fill' | 'magnifyingglass' | 'bell.fill' | 'envelope.fill';
+  icon: 'home' | 'explore' | 'notifications' | 'mail';
 };
 
 const TAB_ICONS: TabConfig[] = [
-  { name: 'index', icon: 'house.fill' },
-  { name: 'explore', icon: 'magnifyingglass' },
-  { name: 'notifications', icon: 'bell.fill' },
-  { name: 'messages', icon: 'envelope.fill' },
+  { name: 'index', icon: 'home' },
+  { name: 'explore', icon: 'explore' },
+  { name: 'notifications', icon: 'notifications' },
+  { name: 'messages', icon: 'mail' },
 ];
 
 export function NavBar({ state, navigation }: BottomTabBarProps) {
@@ -29,7 +29,7 @@ export function NavBar({ state, navigation }: BottomTabBarProps) {
         const tab = TAB_ICONS.find((t) => t.name === route.name);
         if (!tab) return null;
         const focused = state.index === index;
-        const color = focused ? theme.tint : theme.tabIconDefault;
+        const color = focused ? theme.tabIconSelected : theme.tabIconDefault;
 
         return (
           <PlatformPressable
@@ -57,6 +57,6 @@ const styles = StyleSheet.create({
   tab: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 8,
   },
 });

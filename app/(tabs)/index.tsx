@@ -6,25 +6,20 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Avatar } from '@/components/ui/avatar';
-import { PostCard } from '@/components/ui/post-card';
-import { Colors } from '@/constants/theme';
+import { Avatar } from '@/components/atoms/avatar';
+import { PostCard } from '@/components/organisms/post-card';
 import { useAuth } from '@/context/auth';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
-  const border = colorScheme === 'dark' ? '#2a2a2a' : '#e5e5e5';
-  const secondary = colorScheme === 'dark' ? '#9BA1A6' : '#6b7280';
+  const { theme } = useUnistyles();
 
   const { auth } = useAuth();
   const [statuses, setStatuses] = useState<mastodon.v1.Status[]>([]);
@@ -59,20 +54,20 @@ export default function HomeScreen() {
   }, [fetchTimeline]);
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.background }]}>
+    <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <View
         style={[
           styles.header,
           {
             paddingTop: insets.top,
-            backgroundColor: colors.background,
-            borderBottomColor: border,
+            backgroundColor: theme.background,
+            borderBottomColor: theme.border,
           },
         ]}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Mastify</Text>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Mastify</Text>
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.headerBtn} activeOpacity={0.7}>
-            <Ionicons name="options-outline" size={22} color={colors.text} />
+            <Ionicons name="options-outline" size={22} color={theme.text} />
           </TouchableOpacity>
           {auth.avatar ? <Avatar uri={auth.avatar} /> : null}
         </View>
@@ -80,13 +75,13 @@ export default function HomeScreen() {
 
       {loading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.tint} />
+          <ActivityIndicator size="large" color={theme.tint} />
         </View>
       ) : error ? (
         <View style={styles.centered}>
-          <Text style={[styles.errorText, { color: secondary }]}>{error}</Text>
+          <Text style={[styles.errorText, { color: theme.icon }]}>{error}</Text>
           <TouchableOpacity onPress={onRefresh} style={styles.retryBtn}>
-            <Text style={{ color: colors.tint }}>Retry</Text>
+            <Text style={{ color: theme.tint }}>Retry</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -99,9 +94,9 @@ export default function HomeScreen() {
       )}
 
       <Pressable
-        style={[styles.fab, { backgroundColor: colors.tint, bottom: 16 }]}
+        style={[styles.fab, { backgroundColor: theme.tint, bottom: 16 }]}
         android_ripple={{ color: 'rgba(255,255,255,0.3)', radius: 28 }}>
-        <Ionicons name="pencil" size={22} color="#fff" />
+        <Ionicons name="create-outline" size={24} color="#fff" />
       </Pressable>
     </View>
   );
