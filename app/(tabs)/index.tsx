@@ -1,6 +1,6 @@
 import { LegendList } from "@legendapp/list";
 import { createRestAPIClient, mastodon } from 'masto';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -27,33 +27,58 @@ export default function HomeScreen() {
   const [statuses, setStatuses] = useState<mastodon.v1.Status[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTimeline = useCallback(async () => {
-    if (!auth.token || !auth.instance) return;
+  const getClient = () => {
+    if (!auth.token || !auth.instance) return null;
+    return createRestAPIClient({
+      url: `https://${auth.instance}`,
+      accessToken: auth.token,
+    });
+  };
+
+  const fetchTimeline = async () => {
+    const client = getClient();
+    if (!client) return;
     try {
-      const client = createRestAPIClient({
-        url: `https://${auth.instance}`,
-        accessToken: auth.token,
-      });
-      const statuses = await client.v1.timelines.home.list({ limit: 40 });
-      setStatuses(statuses);
+      const result = await client.v1.timelines.home.list({ limit: 40 });
+      setStatuses(result);
+      setHasMore(result.length === 40);
       setError(null);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to load timeline');
     }
-  }, [auth.token, auth.instance]);
+  };
 
   useEffect(() => {
     setLoading(true);
     fetchTimeline().finally(() => setLoading(false));
-  }, [fetchTimeline]);
+  }, [auth.token, auth.instance]);
 
-  const onRefresh = useCallback(async () => {
+  const onRefresh = async () => {
     setRefreshing(true);
     await fetchTimeline();
     setRefreshing(false);
-  }, [fetchTimeline]);
+  };
+
+  const fetchMore = async () => {
+    if (loadingMore || !hasMore || statuses.length === 0) return;
+    const client = getClient();
+    if (!client) return;
+    setLoadingMore(true);
+    try {
+      const maxId = statuses[statuses.length - 1].id;
+      const result = await client.v1.timelines.home.list({ limit: 40, maxId });
+      setStatuses(prev => [...prev, ...result]);
+      setHasMore(result.length === 40);
+    } catch(e: any) {
+      console.error('error: ', e)
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
@@ -92,6 +117,11 @@ export default function HomeScreen() {
           renderItem={({ item }) => <PostCard status={item} />}
           keyExtractor={(item) => item.id}
           recycleItems
+          onEndReached={fetchMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loadingMore ? <ActivityIndicator size="small" color={theme.tint} style={styles.footerSpinner} /> : null
+          }
         />
       )}
 
@@ -123,6 +153,7 @@ const styles = StyleSheet.create({
   headerAvatar: { width: 32, height: 32 },
   card: { borderBottomWidth: StyleSheet.hairlineWidth, paddingTop: 12 },
   avatar: { width: 44, height: 44, borderRadius: 22, marginRight: 12, marginTop: 2 },
+  footerSpinner: { paddingVertical: 16 },
   fab: {
     position: 'absolute',
     right: 20,
