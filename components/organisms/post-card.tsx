@@ -50,7 +50,6 @@ export function PostCard({ status }: { status: mastodon.v1.Status }) {
       )}
 
       <View style={styles.postBody}>
-        {/* <Image source={{ uri: post.account.avatarStatic }} style={styles.avatar} /> */}
         <Avatar uri={post.account.avatarStatic} style={styles.avatar} />
 
         <View style={styles.postMain}>
@@ -89,6 +88,7 @@ export function PostCard({ status }: { status: mastodon.v1.Status }) {
                 color={theme.secondary}
                 active={post.favourited ?? false}
                 activeColor="#e11d48"
+                size={21}
               />
               <ActionItem
                 icon="repeat-outline"
@@ -96,13 +96,14 @@ export function PostCard({ status }: { status: mastodon.v1.Status }) {
                 color={theme.secondary}
                 active={post.reblogged ?? false}
                 activeColor={theme.tint}
+                size={23}
               />
             </View>
             {!booster && (
               <TouchableOpacity activeOpacity={0.6}>
                 <Ionicons
                   name="share-outline"
-                  size={18}
+                  size={19}
                   color={theme.secondary}
                 />
               </TouchableOpacity>

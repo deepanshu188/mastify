@@ -47,7 +47,7 @@ export const Colors = {
   dark: {
     ...sharedColors,
     text: '#ECEDEE',
-    background: '#151718',
+    background: '#141417',
     secondary: '#9BA1A6',
     tint: tintColorDark,
     icon: '#9BA1A6',

@@ -13,10 +13,11 @@ export function decodeEntities(s: string): string {
     .replace(/&#39;/g, "'");
 }
 
-export function stripTags(s: string): string {
-  return decodeEntities(
+export function stripTags(s: string, trim = true): string {
+  const result = decodeEntities(
     s.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n\n').replace(/<[^>]+>/g, ''),
-  ).trim();
+  );
+  return trim ? result.trim() : result;
 }
 
 export function parseContent(html: string): Segment[] {
@@ -27,8 +28,12 @@ export function parseContent(html: string): Segment[] {
 
   while ((match = linkRegex.exec(html)) !== null) {
     if (match.index > lastIndex) {
-      const before = stripTags(html.slice(lastIndex, match.index));
-      if (before) segments.push({ type: 'text', content: before });
+      const before = stripTags(html.slice(lastIndex, match.index), false);
+      if (before.trim()) {
+        segments.push({ type: 'text', content: before });
+      } else if (before.length > 0) {
+        segments.push({ type: 'text', content: ' ' });
+      }
     }
 
     const href = match[1];
@@ -46,8 +51,8 @@ export function parseContent(html: string): Segment[] {
   }
 
   if (lastIndex < html.length) {
-    const tail = stripTags(html.slice(lastIndex));
-    if (tail) segments.push({ type: 'text', content: tail });
+    const tail = stripTags(html.slice(lastIndex), false);
+    if (tail.trim()) segments.push({ type: 'text', content: tail });
   }
 
   return segments;

@@ -11,17 +11,19 @@ export function ActionItem({
     color,
     active,
     activeColor,
+    size,
 }: {
     icon: keyof typeof Ionicons.glyphMap;
     count?: number;
     color: string;
     active?: boolean;
     activeColor?: string;
+    size?: number;
 }) {
     const c = active && activeColor ? activeColor : color;
     return (
         <TouchableOpacity style={styles.actionItem} activeOpacity={0.6}>
-            <Ionicons name={active ? (icon.replace('-outline', '') as keyof typeof Ionicons.glyphMap) : icon} size={18} color={c} />
+            <Ionicons name={active ? (icon.replace('-outline', '') as keyof typeof Ionicons.glyphMap) : icon} size={size || 18} color={c} />
             {count !== undefined && count > 0 && (
                 <Text style={[styles.actionCount, { color: c }]}>{count}</Text>
             )}
