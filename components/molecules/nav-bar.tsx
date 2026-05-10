@@ -52,6 +52,7 @@ export function NavBar({ state, navigation }: BottomTabBarProps) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
+    padding: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   tab: {
