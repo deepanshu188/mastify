@@ -1,22 +1,33 @@
-import {
-    Text,
-} from 'react-native';
+import { parseContent } from '@/utils/html';
+import { Linking, Text } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
-export function PostContent({ text, tint }: { text: string; tint: string; textColor: string }) {
-  const { theme } = useUnistyles()
-  const parts = text.split(/(@[\w@.]+|#\w+)/g);
+export function PostContent({ html, tint }: { html: string; tint: string; textColor: string }) {
+  const { theme } = useUnistyles();
+  const segments = parseContent(html);
+
   return (
     <Text style={[styles.postText, { color: theme.text }]}>
-      {parts.map((part, i) =>
-        part.startsWith('@') || part.startsWith('#') ? (
-          <Text key={i} style={{ color: tint }}>
-            {part}
-          </Text>
-        ) : (
-          part
-        ),
-      )}
+      {segments.map((seg, i) => {
+        if (seg.type === 'hashtag') {
+          return <Text key={i} style={{ color: '#3b82f6' }}>{seg.content}</Text>;
+        }
+        if (seg.type === 'mention') {
+          return <Text key={i} style={{ color: tint }}>{seg.content}</Text>;
+        }
+        if (seg.type === 'link') {
+          return (
+            <Text
+              key={i}
+              style={{ color: tint, textDecorationLine: 'underline' }}
+              onPress={() => Linking.openURL(seg.href)}
+            >
+              {seg.content}
+            </Text>
+          );
+        }
+        return seg.content;
+      })}
     </Text>
   );
 }

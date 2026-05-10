@@ -19,20 +19,6 @@ export function PostCard({ status }: { status: mastodon.v1.Status }) {
   const post = isBoost ? status.reblog! : status;
   const booster = isBoost ? status.account : null;
 
-  function stripHtml(html: string): string {
-    return html
-      .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<\/p>/gi, '\n\n')
-      .replace(/<[^>]+>/g, '')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .trim();
-  }
-
-  const text = stripHtml(post.content);
   const firstImage = post.mediaAttachments.find((a: { type: string }) => a.type === 'image' || a.type === 'gifv');
   const previewUrl = firstImage?.previewUrl ?? firstImage?.url ?? null;
 
@@ -78,8 +64,8 @@ export function PostCard({ status }: { status: mastodon.v1.Status }) {
             @{post.account.acct}
           </Text>
 
-          {text.length > 0 && (
-            <PostContent text={text} tint={theme.tint} textColor={theme.text} />
+          {post.content.length > 0 && (
+            <PostContent html={post.content} tint={theme.tint} textColor={theme.text} />
           )}
 
           {previewUrl && (
