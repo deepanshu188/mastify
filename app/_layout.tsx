@@ -34,6 +34,7 @@ export default function RootLayout() {
           <Stack.Screen name="oauth" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: true, title: 'Modal' }} />
+          <Stack.Screen name="profile/[accountId]" />
         </Stack>
         <StatusBar style="auto" />
       </AuthProvider>

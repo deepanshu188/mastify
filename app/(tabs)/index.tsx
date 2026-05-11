@@ -1,4 +1,5 @@
 import { LegendList } from "@legendapp/list";
+import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Pressable,
@@ -21,8 +22,12 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useUnistyles();
 
+  const router = useRouter();
   const { auth } = useAuth();
   const { statuses, setStatuses, loading, refreshing, loadingMore, error, onRefresh, fetchMore } = useHomeTimeline();
+
+  const navigateToProfile = (accountId: string) =>
+    router.push({ pathname: '/profile/[accountId]', params: { accountId } });
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
@@ -58,7 +63,7 @@ export default function HomeScreen() {
       ) : (
         <LegendList
           data={statuses}
-          renderItem={({ item }) => <PostCard status={item} setStatuses={setStatuses} />}
+          renderItem={({ item }) => <PostCard status={item} setStatuses={setStatuses} onAuthorPress={navigateToProfile} />}
           keyExtractor={(item) => item.id}
           recycleItems
           refreshing={refreshing}

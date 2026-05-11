@@ -33,10 +33,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const navigateRef = useRef<() => void>(null);
   navigateRef.current = () => {
-    const inAuthGroup = segments[0] === '(tabs)';
-    if (!auth.token && inAuthGroup) {
+    const onLoginScreen = segments[0] === 'login' || segments[0] === 'oauth';
+    if (!auth.token && !onLoginScreen) {
       router.replace('/login');
-    } else if (auth.token && !inAuthGroup) {
+    } else if (auth.token && onLoginScreen) {
       router.replace('/(tabs)');
     }
   };

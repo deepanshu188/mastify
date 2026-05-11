@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { mastodon } from 'masto';
+import type { MastoStatus } from '@/types/mastodon';
 import {
   Text,
   TouchableOpacity,
@@ -15,9 +15,10 @@ import { ActionItem } from '../atoms/action-item';
 import { Avatar } from '../atoms/avatar';
 import { PostContent } from '../molecules/post-content';
 
-export function PostCard({ status, setStatuses }: {
-  status: mastodon.v1.Status;
-  setStatuses: Dispatch<SetStateAction<mastodon.v1.Status[]>>;
+export function PostCard({ status, setStatuses, onAuthorPress }: {
+  status: MastoStatus;
+  setStatuses: Dispatch<SetStateAction<MastoStatus[]>>;
+  onAuthorPress?: (accountId: string) => void;
 }) {
   const { theme } = useUnistyles()
   const client = useMastoClient()
@@ -29,14 +30,14 @@ export function PostCard({ status, setStatuses }: {
   async function toggleAction(
     activeField: 'favourited' | 'reblogged',
     countField: 'favouritesCount' | 'reblogsCount',
-    doAction: (statusApi: ReturnType<NonNullable<typeof client>['v1']['statuses']['$select']>, next: boolean) => Promise<mastodon.v1.Status>,
+    doAction: (statusApi: ReturnType<NonNullable<typeof client>['v1']['statuses']['$select']>, next: boolean) => Promise<MastoStatus>,
   ) {
     if (!client) return;
     const statusApi = client.v1.statuses.$select(post.id);
     const next = !post[activeField];
     const originalCount = post[countField];
 
-    const updateInTimeline = (mapper: (s: mastodon.v1.Status) => mastodon.v1.Status) =>
+    const updateInTimeline = (mapper: (s: MastoStatus) => MastoStatus) =>
       setStatuses(prev => prev.map(s =>
         s.id === post.id ? mapper(s) :
         s.reblog?.id === post.id ? { ...s, reblog: mapper(s.reblog!) } :
@@ -75,13 +76,23 @@ export function PostCard({ status, setStatuses }: {
       )}
 
       <View style={styles.postBody}>
-        <Avatar uri={post.account.avatarStatic} style={styles.avatar} />
+        <Avatar
+          uri={post.account.avatarStatic}
+          style={styles.avatar}
+          onPress={() => onAuthorPress?.(post.account.id)}
+        />
 
         <View style={styles.postMain}>
           <View style={styles.authorRow}>
-            <Text style={[styles.displayName, { color: theme.text }]} numberOfLines={1}>
-              {post.account.displayName || post.account.acct}
-            </Text>
+            <TouchableOpacity
+              onPress={() => onAuthorPress?.(post.account.id)}
+              activeOpacity={0.7}
+              style={styles.displayNameBtn}
+            >
+              <Text style={[styles.displayName, { color: theme.text }]} numberOfLines={1}>
+                {post.account.displayName || post.account.acct}
+              </Text>
+            </TouchableOpacity>
             <Text style={[styles.timeAgo, { color: theme.secondary }]}>{timeAgo(post.createdAt)}</Text>
           </View>
           <Text style={[styles.handle, { color: theme.secondary }]} numberOfLines={1}>
@@ -169,7 +180,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 1,
   },
-  displayName: { fontSize: 15, fontWeight: '600', flex: 1, marginRight: 8 },
+  displayNameBtn: { flex: 1, marginRight: 8 },
+  displayName: { fontSize: 15, fontWeight: '600' },
   timeAgo: { fontSize: 13 },
   handle: { fontSize: 13, marginBottom: 8 },
   media: { width: '100%', height: 180, borderRadius: 10, marginBottom: 10 },

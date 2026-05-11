@@ -1,10 +1,10 @@
-import { mastodon } from 'masto';
 import { useEffect, useState } from 'react';
 import { useMastoClient } from './use-masto-client';
+import type { MastoStatus } from '@/types/mastodon';
 
 export function useHomeTimeline() {
   const client = useMastoClient();
-  const [statuses, setStatuses] = useState<mastodon.v1.Status[]>([]);
+  const [statuses, setStatuses] = useState<MastoStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
