@@ -13,13 +13,13 @@ export function PostContent({ html, tint }: { html: string; tint: string; textCo
           return <Text key={i} style={{ color: '#3b82f6' }}>{seg.content}</Text>;
         }
         if (seg.type === 'mention') {
-          return <Text key={i} style={{ color: tint }}>{seg.content}</Text>;
+          return <Text key={i} style={{ color: '#3b82f6' }}>{seg.content}</Text>;
         }
         if (seg.type === 'link') {
           return (
             <Text
               key={i}
-              style={{ color: tint, textDecorationLine: 'underline' }}
+              style={{ color: '#3b82f6', textDecorationLine: 'underline' }}
               onPress={() => Linking.openURL(seg.href)}
             >
               {seg.content}
