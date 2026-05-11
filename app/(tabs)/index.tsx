@@ -22,7 +22,7 @@ export default function HomeScreen() {
   const { theme } = useUnistyles();
 
   const { auth } = useAuth();
-  const { statuses, loading, refreshing, loadingMore, error, onRefresh, fetchMore } = useHomeTimeline();
+  const { statuses, setStatuses, loading, refreshing, loadingMore, error, onRefresh, fetchMore } = useHomeTimeline();
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
@@ -58,7 +58,7 @@ export default function HomeScreen() {
       ) : (
         <LegendList
           data={statuses}
-          renderItem={({ item }) => <PostCard status={item} />}
+          renderItem={({ item }) => <PostCard status={item} setStatuses={setStatuses} />}
           keyExtractor={(item) => item.id}
           recycleItems
           refreshing={refreshing}

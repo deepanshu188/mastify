@@ -7,28 +7,53 @@ import {
   View,
 } from 'react-native';
 
+import { useMastoClient } from '@/hooks/use-masto-client';
+import { timeAgo } from '@/utils/time';
+import { Dispatch, SetStateAction } from 'react';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { ActionItem } from '../atoms/action-item';
 import { Avatar } from '../atoms/avatar';
 import { PostContent } from '../molecules/post-content';
 
-export function PostCard({ status }: { status: mastodon.v1.Status }) {
+export function PostCard({ status, setStatuses }: {
+  status: mastodon.v1.Status;
+  setStatuses: Dispatch<SetStateAction<mastodon.v1.Status[]>>;
+}) {
   const { theme } = useUnistyles()
+  const client = useMastoClient()
 
   const isBoost = !!status.reblog;
   const post = isBoost ? status.reblog! : status;
   const booster = isBoost ? status.account : null;
 
+  async function toggleAction(
+    activeField: 'favourited' | 'reblogged',
+    countField: 'favouritesCount' | 'reblogsCount',
+    doAction: (statusApi: ReturnType<NonNullable<typeof client>['v1']['statuses']['$select']>, next: boolean) => Promise<mastodon.v1.Status>,
+  ) {
+    if (!client) return;
+    const statusApi = client.v1.statuses.$select(post.id);
+    const next = !post[activeField];
+    const originalCount = post[countField];
+
+    const updateInTimeline = (mapper: (s: mastodon.v1.Status) => mastodon.v1.Status) =>
+      setStatuses(prev => prev.map(s =>
+        s.id === post.id ? mapper(s) :
+        s.reblog?.id === post.id ? { ...s, reblog: mapper(s.reblog!) } :
+        s
+      ));
+
+    updateInTimeline(s => ({ ...s, [activeField]: next, [countField]: s[countField] + (next ? 1 : -1) }));
+    try {
+      const updated = await doAction(statusApi, next);
+      updateInTimeline(() => updated);
+    } catch {
+      updateInTimeline(s => ({ ...s, [activeField]: !next, [countField]: originalCount }));
+    }
+  }
+
   const firstImage = post.mediaAttachments.find((a: { type: string }) => a.type === 'image' || a.type === 'gifv');
   const previewUrl = firstImage?.previewUrl ?? firstImage?.url ?? null;
-
-  function timeAgo(iso: string): string {
-    const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-    if (diff < 60) return `${Math.floor(diff)}s`;
-    if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-    return `${Math.floor(diff / 86400)}d`;
-  }
 
   return (
     <View style={[styles.card, { borderBottomColor: theme.border }]}>
@@ -89,14 +114,22 @@ export function PostCard({ status }: { status: mastodon.v1.Status }) {
                 active={post.favourited ?? false}
                 activeColor="#e11d48"
                 size={21}
+                onPress={() => toggleAction(
+                  'favourited', 'favouritesCount',
+                  (statusApi, next) => next ? statusApi.favourite() : statusApi.unfavourite(),
+                )}
               />
               <ActionItem
                 icon="repeat-outline"
                 count={post.reblogsCount}
                 color={theme.secondary}
                 active={post.reblogged ?? false}
-                activeColor={theme.tint}
+                activeColor="#22c55e"
                 size={23}
+                onPress={() => toggleAction(
+                  'reblogged', 'reblogsCount',
+                  (statusApi, next) => (next ? statusApi.reblog() : statusApi.unreblog()).then(u => u.reblog ?? u),
+                )}
               />
             </View>
             {!booster && (
